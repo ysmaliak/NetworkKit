@@ -54,19 +54,28 @@ NetworkManager.configure()
 // Configure with individual settings
 NetworkManager.configure(
     baseURL: URL(string: "https://api.example.com"),
+    retryPolicy: .default,
+    authProvider: .none,
     urlSessionConfiguration: .default,
     decoder: .iso8601,
     encoder: .iso8601,
-    cache: .shared
+    cache: .shared,
+    cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
+    timeoutInterval: 30
 )
 
 // Or use a configuration object
-var config = NetworkKit.Configuration()
-config.baseURL = URL(string: "https://api.example.com")
-config.urlSessionConfiguration.timeoutInterval = 30
-config.decoder = JSONDecoder() // Custom decoder
-config.encoder = JSONEncoder() // Custom encoder
-config.cache = URLCache(memoryCapacity: 10_000_000, diskCapacity: 100_000_000)
+var config = NetworkKit.Configuration(
+    baseURL: URL(string: "https://api.example.com"),
+    retryPolicy: .default,
+    authProvider: .none,
+    urlSessionConfiguration: .default,
+    decoder: .iso8601,
+    encoder: .iso8601,
+    cache: .shared,
+    cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
+    timeoutInterval: 30
+)
 
 NetworkManager.configure(with: config)
 ```
