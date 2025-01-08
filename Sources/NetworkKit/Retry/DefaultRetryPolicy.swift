@@ -19,8 +19,8 @@ public final actor DefaultRetryPolicy: RetryPolicy {
     /// Maximum number of retry attempts allowed
     private let maxRetries = 3
 
-    /// Base delay in seconds for exponential backoff
-    private let baseDelay: TimeInterval = 0.3
+    /// Delay in seconds for exponential backoff
+    private let delay: TimeInterval = 0.3
 
     /// HTTP status codes that trigger authentication retry
     private let authRetryableStatusCodes: Set<Int> = [401, 403]
@@ -54,7 +54,7 @@ public final actor DefaultRetryPolicy: RetryPolicy {
         }
 
         guard !generalRetryableStatusCodes.contains(response.statusCode) else {
-            try await Task.sleep(nanoseconds: UInt64(baseDelay * Double(NSEC_PER_SEC)))
+            try await Task.sleep(nanoseconds: UInt64(delay * Double(NSEC_PER_SEC)))
             return true
         }
 
