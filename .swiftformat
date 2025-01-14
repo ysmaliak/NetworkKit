@@ -479,7 +479,7 @@
 --enable blankLineAfterSwitchCase
 
 # 📃[condassignment] - Adds parentheses around the assignment in conditions to silence warnings and make intent clear.
---condassignment always
+--condassignment after-property
 
 # 📃[hoistAwait] - Move await keyword to the beginning of expressions to improve readability.
 --disable hoistAwait

@@ -18,7 +18,7 @@ public struct Request<Response: Decodable>: Sendable {
     public let contentType: ContentType
 
     /// Optional query parameters to be added to the URL
-    public let query: [String: String]?
+    public let query: Query?
 
     /// Optional HTTP headers to be included in the request
     public let headers: [String: String]?
@@ -64,6 +64,90 @@ public struct Request<Response: Decodable>: Sendable {
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
+        self.headers = headers
+        self.body = body
+        self.timeoutInterval = timeoutInterval
+        self.cachePolicy = cachePolicy
+        self.authenticationProvider = authenticationProvider
+
+        if let query {
+            self.query = .dictionary(query)
+        } else {
+            self.query = nil
+        }
+    }
+
+    /// Creates a new request with a base URL and path
+    /// - Parameters:
+    ///   - method: The HTTP method
+    ///   - baseURL: Base URL for the request (defaults to APIClient configuration)
+    ///   - path: Path component to append to base URL
+    ///   - contentType: Type of content being sent
+    ///   - query: Optional query parameters
+    ///   - headers: Optional HTTP headers
+    ///   - body: Optional request body
+    ///   - timeoutInterval: Optional timeout duration
+    ///   - cachePolicy: Cache policy for the request
+    ///   - authenticationProvider: Authentication provider for the request
+    public init(
+        method: HTTPMethod,
+        baseURL: URL? = NetworkManager.configuration.baseURL,
+        path: String,
+        contentType: ContentType = .json,
+        query: String? = nil,
+        headers: [String: String]? = nil,
+        body: Body? = nil,
+        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
+        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
+        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+    ) {
+        self.method = method
+        self.baseURL = baseURL
+        self.path = path
+        absoluteURL = nil
+        self.contentType = contentType
+        self.headers = headers
+        self.body = body
+        self.timeoutInterval = timeoutInterval
+        self.cachePolicy = cachePolicy
+        self.authenticationProvider = authenticationProvider
+
+        if let query {
+            self.query = .string(query)
+        } else {
+            self.query = nil
+        }
+    }
+
+    /// Creates a new request with a base URL and path
+    /// - Parameters:
+    ///   - method: The HTTP method
+    ///   - baseURL: Base URL for the request (defaults to APIClient configuration)
+    ///   - path: Path component to append to base URL
+    ///   - contentType: Type of content being sent
+    ///   - query: Optional query parameters
+    ///   - headers: Optional HTTP headers
+    ///   - body: Optional request body
+    ///   - timeoutInterval: Optional timeout duration
+    ///   - cachePolicy: Cache policy for the request
+    ///   - authenticationProvider: Authentication provider for the request
+    public init(
+        method: HTTPMethod,
+        baseURL: URL? = NetworkManager.configuration.baseURL,
+        path: String,
+        contentType: ContentType = .json,
+        query: Query? = nil,
+        headers: [String: String]? = nil,
+        body: Body? = nil,
+        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
+        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
+        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+    ) {
+        self.method = method
+        self.baseURL = baseURL
+        self.path = path
+        absoluteURL = nil
+        self.contentType = contentType
         self.query = query
         self.headers = headers
         self.body = body
@@ -88,6 +172,86 @@ public struct Request<Response: Decodable>: Sendable {
         absoluteURL: URL,
         contentType: ContentType = .json,
         query: [String: String]? = nil,
+        headers: [String: String]? = nil,
+        body: Body? = nil,
+        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
+        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
+        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+    ) {
+        self.method = method
+        baseURL = nil
+        path = ""
+        self.absoluteURL = absoluteURL
+        self.contentType = contentType
+        self.headers = headers
+        self.body = body
+        self.timeoutInterval = timeoutInterval
+        self.cachePolicy = cachePolicy
+        self.authenticationProvider = authenticationProvider
+
+        if let query {
+            self.query = .dictionary(query)
+        } else {
+            self.query = nil
+        }
+    }
+
+    /// Creates a new request with an absolute URL
+    /// - Parameters:
+    ///   - method: The HTTP method
+    ///   - absoluteURL: Complete URL for the request
+    ///   - contentType: Type of content being sent
+    ///   - query: Optional query parameters
+    ///   - headers: Optional HTTP headers
+    ///   - body: Optional request body
+    ///   - timeoutInterval: Optional timeout duration
+    ///   - cachePolicy: Cache policy for the request
+    ///   - authenticationProvider: Authentication provider for the request
+    public init(
+        method: HTTPMethod,
+        absoluteURL: URL,
+        contentType: ContentType = .json,
+        query: String? = nil,
+        headers: [String: String]? = nil,
+        body: Body? = nil,
+        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
+        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
+        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+    ) {
+        self.method = method
+        baseURL = nil
+        path = ""
+        self.absoluteURL = absoluteURL
+        self.contentType = contentType
+        self.headers = headers
+        self.body = body
+        self.timeoutInterval = timeoutInterval
+        self.cachePolicy = cachePolicy
+        self.authenticationProvider = authenticationProvider
+
+        if let query {
+            self.query = .string(query)
+        } else {
+            self.query = nil
+        }
+    }
+
+    /// Creates a new request with an absolute URL
+    /// - Parameters:
+    ///   - method: The HTTP method
+    ///   - absoluteURL: Complete URL for the request
+    ///   - contentType: Type of content being sent
+    ///   - query: Optional query parameters
+    ///   - headers: Optional HTTP headers
+    ///   - body: Optional request body
+    ///   - timeoutInterval: Optional timeout duration
+    ///   - cachePolicy: Cache policy for the request
+    ///   - authenticationProvider: Authentication provider for the request
+    public init(
+        method: HTTPMethod,
+        absoluteURL: URL,
+        contentType: ContentType = .json,
+        query: Query? = nil,
         headers: [String: String]? = nil,
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
@@ -192,8 +356,13 @@ public struct Request<Response: Decodable>: Sendable {
             throw RequestError.invalidURL
         }
 
-        if let query, !query.isEmpty {
-            components.queryItems = query.map(URLQueryItem.init)
+        if let query {
+            switch query {
+            case .dictionary(let dictionary):
+                components.queryItems = dictionary.map(URLQueryItem.init)
+            case .string(let string):
+                components.query = string
+            }
         }
 
         guard let url = components.url else {
@@ -216,5 +385,14 @@ extension Request {
         /// Multipart form data content type for file uploads and form submissions
         /// - Parameter fields: Array of multipart form fields to be included in the request
         case multipartData([MultipartDataField])
+    }
+
+    /// Represents the query parameters of the request
+    public enum Query: Sendable {
+        /// Query parameters as a dictionary
+        case dictionary([String: String])
+
+        /// Query parameters as a single string
+        case string(String)
     }
 }
