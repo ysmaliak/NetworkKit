@@ -47,6 +47,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - timeoutInterval: Optional timeout duration
     ///   - cachePolicy: Cache policy for the request
     ///   - authenticationProvider: Authentication provider for the request
+    @_disfavoredOverload
     public init(
         method: HTTPMethod,
         baseURL: URL? = NetworkManager.configuration.baseURL,
@@ -89,6 +90,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - timeoutInterval: Optional timeout duration
     ///   - cachePolicy: Cache policy for the request
     ///   - authenticationProvider: Authentication provider for the request
+    @_disfavoredOverload
     public init(
         method: HTTPMethod,
         baseURL: URL? = NetworkManager.configuration.baseURL,
@@ -167,6 +169,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - timeoutInterval: Optional timeout duration
     ///   - cachePolicy: Cache policy for the request
     ///   - authenticationProvider: Authentication provider for the request
+    @_disfavoredOverload
     public init(
         method: HTTPMethod,
         absoluteURL: URL,
@@ -207,6 +210,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - timeoutInterval: Optional timeout duration
     ///   - cachePolicy: Cache policy for the request
     ///   - authenticationProvider: Authentication provider for the request
+    @_disfavoredOverload
     public init(
         method: HTTPMethod,
         absoluteURL: URL,
