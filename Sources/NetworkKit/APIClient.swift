@@ -15,7 +15,7 @@ public protocol APIClientProtocol: Sendable {
     func data(for request: Request<Data>, retryPolicy: RetryPolicy) async throws -> Data
 
     /// Downloads data from a raw URL with retry support.
-    func data(for url: URL, retryPolicy: RetryPolicy) async throws -> Data
+    func data(for url: URL, retryPolicy: RetryPolicy, authenticationProvider: AuthenticationProvider) async throws -> Data
 }
 
 /// An actor that handles network requests with built-in retry and authentication support.
@@ -124,7 +124,11 @@ public actor APIClient: APIClientProtocol {
     ///   - retryPolicy: Policy determining retry behavior for failed requests
     /// - Returns: The downloaded data
     /// - Throws: APIError or any network request error
-    public func data(for url: URL, retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy) async throws -> Data {
+    public func data(
+        for url: URL,
+        retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy,
+        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+    ) async throws -> Data {
         let urlRequest = URLRequest(url: url)
         let (data, response) = try await session.data(for: urlRequest)
 
@@ -133,7 +137,12 @@ public actor APIClient: APIClientProtocol {
         }
 
         guard 200 ... 299 ~= response.statusCode else {
-            guard try await retryPolicy.shouldRetry(for: response, data: data, authenticationProvider: NoAuthProvider()) else {
+            guard try await retryPolicy.shouldRetry(
+                request: urlRequest,
+                response: response,
+                data: data,
+                authenticationProvider: authenticationProvider
+            ) else {
                 throw APIError.httpError(response: response, data: data)
             }
 
@@ -165,7 +174,12 @@ public actor APIClient: APIClientProtocol {
         retryPolicy: RetryPolicy
     ) async throws -> T {
         guard 200 ... 299 ~= response.statusCode else {
-            guard try await retryPolicy.shouldRetry(for: response, data: data, authenticationProvider: request.authenticationProvider) else {
+            guard try await retryPolicy.shouldRetry(
+                request: try await request.asURLRequest(),
+                response: response,
+                data: data,
+                authenticationProvider: request.authenticationProvider
+            ) else {
                 throw APIError.httpError(response: response, data: data)
             }
 

@@ -36,12 +36,14 @@ public final actor DefaultRetryPolicy: RetryPolicy {
     /// This method implements the retry logic with exponential backoff and authentication handling.
     ///
     /// - Parameters:
-    ///   - response: The HTTPURLResponse from the request
-    ///   - data: The data returned from the request
+    ///   - request: The original URLRequest that failed
+    ///   - response: The HTTP response from the failed request
+    ///   - data: Response data from the failed request
     ///   - authenticationProvider: The authentication provider
     /// - Returns: A boolean indicating whether to retry the request
     public func shouldRetry(
-        for response: HTTPURLResponse,
+        request _: URLRequest,
+        response: HTTPURLResponse,
         data _: Data,
         authenticationProvider: AuthenticationProvider
     ) async throws -> Bool {

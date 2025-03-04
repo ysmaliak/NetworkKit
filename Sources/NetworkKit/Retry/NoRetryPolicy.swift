@@ -9,12 +9,14 @@ public struct NoRetryPolicy: RetryPolicy {
     /// This method always returns false, indicating that no retries should be attempted.
     ///
     /// - Parameters:
-    ///   - response: The HTTPURLResponse from the request
-    ///   - data: The data returned from the request
+    ///   - request: The original URLRequest that failed
+    ///   - response: The HTTP response from the failed request
+    ///   - data: Response data from the failed request
     ///   - authenticationProvider: The authentication provider
     /// - Returns: Always false, indicating no retries
     public func shouldRetry(
-        for _: HTTPURLResponse,
+        request _: URLRequest,
+        response _: HTTPURLResponse,
         data _: Data,
         authenticationProvider _: AuthenticationProvider
     ) async throws -> Bool { false }

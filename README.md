@@ -224,7 +224,8 @@ final actor CustomRetryPolicy: RetryPolicy {
     }
     
     func shouldRetry(
-        for response: HTTPURLResponse,
+        request: URLRequest,
+        response: HTTPURLResponse,
         data: Data,
         authenticationProvider: AuthenticationProvider
     ) async throws -> Bool {

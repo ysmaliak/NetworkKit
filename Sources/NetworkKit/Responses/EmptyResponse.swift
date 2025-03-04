@@ -10,6 +10,6 @@ import Foundation
 /// let request = Request<EmptyResponse>(method: .delete, path: "/users/123")
 /// let response = try await client.send(request)
 /// ```
-public struct EmptyResponse: Decodable {
+public struct EmptyResponse: Decodable, Sendable {
     public init() {}
 }
