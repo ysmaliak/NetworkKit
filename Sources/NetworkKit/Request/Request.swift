@@ -20,8 +20,8 @@ public struct Request<Response: Decodable>: Sendable {
     /// Optional query parameters to be added to the URL
     public var query: Query?
 
-    /// Optional HTTP headers to be included in the request
-    public var headers: [String: String]?
+    /// HTTP headers to be included in the request
+    public var headers: [String: String]
 
     /// Optional body data to be sent with the request
     public var body: Body?
@@ -54,7 +54,7 @@ public struct Request<Response: Decodable>: Sendable {
         path: String,
         contentType: ContentType = .json,
         query: [String: String]? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -97,7 +97,7 @@ public struct Request<Response: Decodable>: Sendable {
         path: String,
         contentType: ContentType = .json,
         query: String? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -139,7 +139,7 @@ public struct Request<Response: Decodable>: Sendable {
         path: String,
         contentType: ContentType = .json,
         query: Query? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -175,7 +175,7 @@ public struct Request<Response: Decodable>: Sendable {
         absoluteURL: URL,
         contentType: ContentType = .json,
         query: [String: String]? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -216,7 +216,7 @@ public struct Request<Response: Decodable>: Sendable {
         absoluteURL: URL,
         contentType: ContentType = .json,
         query: String? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -256,7 +256,7 @@ public struct Request<Response: Decodable>: Sendable {
         absoluteURL: URL,
         contentType: ContentType = .json,
         query: Query? = nil,
-        headers: [String: String]? = nil,
+        headers: [String: String] = [:],
         body: Body? = nil,
         timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
         cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
@@ -329,10 +329,8 @@ public struct Request<Response: Decodable>: Sendable {
             urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
         }
 
-        if let headers {
-            for header in headers where urlRequest.value(forHTTPHeaderField: header.0) == nil {
-                urlRequest.setValue(header.1, forHTTPHeaderField: header.0)
-            }
+        for header in headers where urlRequest.value(forHTTPHeaderField: header.0) == nil {
+            urlRequest.setValue(header.1, forHTTPHeaderField: header.0)
         }
 
         if let timeoutInterval {
