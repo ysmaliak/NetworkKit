@@ -18,22 +18,22 @@ public struct Request<Response: Decodable>: Sendable {
     public let contentType: ContentType
 
     /// Optional query parameters to be added to the URL
-    public let query: Query?
+    public var query: Query?
 
     /// Optional HTTP headers to be included in the request
-    public let headers: [String: String]?
+    public var headers: [String: String]?
 
     /// Optional body data to be sent with the request
-    public let body: Body?
+    public var body: Body?
 
     /// Optional timeout interval for the request
-    public let timeoutInterval: TimeInterval?
+    public var timeoutInterval: TimeInterval?
 
     /// Cache policy for the request
-    public let cachePolicy: URLRequest.CachePolicy
+    public var cachePolicy: URLRequest.CachePolicy
 
     /// Authentication provider for the request
-    public let authenticationProvider: AuthenticationProvider
+    public var authenticationProvider: AuthenticationProvider
 
     /// Creates a new request with a base URL and path
     /// - Parameters:
