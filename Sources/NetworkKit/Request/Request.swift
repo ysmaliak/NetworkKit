@@ -300,7 +300,8 @@ public struct Request<Response: Decodable>: Sendable {
                 method: method,
                 headers: headers,
                 cachePolicy: cachePolicy,
-                timeoutInterval: timeoutInterval
+                timeoutInterval: timeoutInterval,
+                authenticationProvider: authenticationProvider
             )
         }
     }
