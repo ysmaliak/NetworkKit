@@ -186,6 +186,10 @@ public actor APIClient: APIClientProtocol {
             return try await send(request, cached: cached)
         }
 
+        guard T.self != EmptyResponse.self else {
+            return EmptyResponse() as! T
+        }
+
         return try decoder.decode(T.self, from: data)
     }
 }
