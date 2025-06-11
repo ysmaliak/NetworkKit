@@ -22,6 +22,9 @@ let package = Package(
             name: "NetworkKit",
             resources: [
                 .process("Resources/Localizable.xcstrings")
+            ],
+            swiftSettings: [
+              .enableUpcomingFeature("StrictConcurrency")
             ]
         )
     ]
