@@ -53,9 +53,9 @@ public struct MultipartData {
         url: URL,
         method: HTTPMethod,
         headers: [String: String]?,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        cachePolicy: URLRequest.CachePolicy,
+        timeoutInterval: TimeInterval?,
+        authenticationProvider: AuthenticationProvider
     ) async throws -> URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.cachePolicy = cachePolicy

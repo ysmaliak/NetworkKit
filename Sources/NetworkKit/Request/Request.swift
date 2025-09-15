@@ -240,15 +240,16 @@ public struct Request<Response: Decodable>: Sendable {
         self.query = query
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        self.timeoutInterval = configuration.timeoutInterval
+        self.cachePolicy = configuration.cachePolicy
+        self.authenticationProvider = configuration.authenticationProvider
     }
 
     /// Converts the request into a URLRequest
+    /// - Parameter encoder: The JSON encoder to use for the request
     /// - Returns: A configured URLRequest ready to be sent
     /// - Throws: RequestError if URL construction fails or authentication fails
-    public func asURLRequest() async throws -> URLRequest {
+    public func asURLRequest(encoder: JSONEncoder) async throws -> URLRequest {
         let url: URL = if let absoluteURL {
             absoluteURL
         } else {
@@ -257,7 +258,7 @@ public struct Request<Response: Decodable>: Sendable {
 
         switch contentType {
         case .json:
-            return try await asURLRequest(url: url)
+            return try await asURLRequest(url: url, encoder: encoder)
         case .multipartData(let fields):
             let multipartData = MultipartData()
 
@@ -280,7 +281,7 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameter url: The URL for the request
     /// - Returns: A configured URLRequest
     /// - Throws: Errors from authentication or JSON encoding
-    private func asURLRequest(url: URL) async throws -> URLRequest {
+    private func asURLRequest(url: URL, encoder: JSONEncoder) async throws -> URLRequest {
         var urlRequest = URLRequest(url: url)
 
         urlRequest.cachePolicy = cachePolicy
@@ -289,7 +290,7 @@ public struct Request<Response: Decodable>: Sendable {
         try await authenticationProvider.authenticate(&urlRequest)
 
         if let body {
-            urlRequest.httpBody = try NetworkManager.configuration.encoder.encode(body)
+            urlRequest.httpBody = try encoder.encode(body)
 
             if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
                 urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -373,13 +374,13 @@ extension Request {
 extension Request {
     public struct Configuration: Sendable {
         public let baseURL: URL?
-        public let timeoutInterval: TimeInterval
+        public let timeoutInterval: TimeInterval?
         public let cachePolicy: URLRequest.CachePolicy
         public let authenticationProvider: AuthenticationProvider
 
         public init(
             baseURL: URL? = nil,
-            timeoutInterval: TimeInterval = 30,
+            timeoutInterval: TimeInterval? = 30,
             cachePolicy: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData,
             authenticationProvider: AuthenticationProvider = .none
         ) {

@@ -34,21 +34,24 @@ public actor APIClient: APIClientProtocol {
     /// The URLSession used for network requests
     ///
     /// Created lazily with the current configuration settings
-    private var session: URLSession {
-        URLSession(configuration: NetworkManager.configuration.urlSessionConfiguration)
-    }
+    private let session: URLSession
 
     /// JSON decoder used for parsing responses
-    private var decoder: JSONDecoder { NetworkManager.configuration.decoder }
+    private let decoder: JSONDecoder
 
     /// JSON encoder used for request bodies
-    private var encoder: JSONEncoder { NetworkManager.configuration.encoder }
+    private let encoder: JSONEncoder
 
     /// Cache for storing and retrieving responses
-    private var cache: URLCache { NetworkManager.configuration.cache }
+    private let cache: URLCache
 
     /// Creates a new APIClient with the specified configuration.
-    public init() {}
+    public init(configuration: Configuration) {
+        self.session = URLSession(configuration: configuration.urlSessionConfiguration)
+        self.decoder = configuration.decoder
+        self.encoder = configuration.encoder
+        self.cache = configuration.cache
+    }
 
     /// Sends a network request and decodes the response.
     ///
@@ -64,7 +67,7 @@ public actor APIClient: APIClientProtocol {
         retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy,
         cached: Bool = false
     ) async throws -> T {
-        let urlRequest = try await request.asURLRequest()
+        let urlRequest = try await request.asURLRequest(encoder: encoder)
 
         let (data, response) = try await fetchResponse(for: urlRequest, useCaching: cached)
 
@@ -89,7 +92,7 @@ public actor APIClient: APIClientProtocol {
         from data: Data,
         retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy
     ) async throws -> T {
-        let urlRequest = try await request.asURLRequest()
+        let urlRequest = try await request.asURLRequest(encoder: encoder)
         let (responseData, response) = try await session.upload(for: urlRequest, from: data)
 
         guard let response = response as? HTTPURLResponse else {
@@ -107,7 +110,7 @@ public actor APIClient: APIClientProtocol {
     /// - Returns: The downloaded data
     /// - Throws: APIError or any network request error
     public func data(for request: Request<Data>, retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy) async throws -> Data {
-        let urlRequest = try await request.asURLRequest()
+        let urlRequest = try await request.asURLRequest(encoder: encoder)
         let (data, response) = try await session.data(for: urlRequest)
 
         guard let response = response as? HTTPURLResponse else {
@@ -175,7 +178,7 @@ public actor APIClient: APIClientProtocol {
     ) async throws -> T {
         guard 200 ... 299 ~= response.statusCode else {
             guard try await retryPolicy.shouldRetry(
-                request: try await request.asURLRequest(),
+                request: await request.asURLRequest(encoder: encoder),
                 response: response,
                 data: data,
                 authenticationProvider: request.authenticationProvider
@@ -191,5 +194,29 @@ public actor APIClient: APIClientProtocol {
         }
 
         return try decoder.decode(T.self, from: data)
+    }
+}
+
+extension APIClient {
+    public struct Configuration: Sendable {
+        public let retryPolicy: RetryPolicy
+        public let urlSessionConfiguration: URLSessionConfiguration
+        public let decoder: JSONDecoder
+        public let encoder: JSONEncoder
+        public let cache: URLCache
+
+        public init(
+            retryPolicy: RetryPolicy = .default,
+            urlSessionConfiguration: URLSessionConfiguration = .default,
+            decoder: JSONDecoder = .iso8601,
+            encoder: JSONEncoder = .iso8601,
+            cache: URLCache = .shared
+        ) {
+            self.retryPolicy = retryPolicy
+            self.urlSessionConfiguration = urlSessionConfiguration
+            self.decoder = decoder
+            self.encoder = encoder
+            self.cache = cache
+        }
     }
 }
