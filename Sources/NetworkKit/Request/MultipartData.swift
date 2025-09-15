@@ -15,7 +15,7 @@ public struct MultipartDataField: Sendable {
     /// - Parameters:
     ///   - parameters: Key-value pairs of parameters for the field
     ///   - data: The content data
-    ///   - mimeType: Optional MIME type of the content
+    ///   - mimeType: Optional MIME type of the content. Defaults to `nil`.
     public init(parameters: [String: String], data: Data, mimeType: String? = nil) {
         self.parameters = parameters
         self.data = data
@@ -53,9 +53,9 @@ public struct MultipartData {
         url: URL,
         method: HTTPMethod,
         headers: [String: String]?,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        cachePolicy: URLRequest.CachePolicy,
+        timeoutInterval: TimeInterval?,
+        authenticationProvider: AuthenticationProvider
     ) async throws -> URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.cachePolicy = cachePolicy
@@ -74,8 +74,8 @@ public struct MultipartData {
         urlRequest.httpMethod = method.rawValue
         urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        // Finalize body data
-        httpBody.append(string: "--\(boundary)--")
+        // Finalize body data with closing boundary
+        httpBody.append(string: "--\(boundary)--\r\n")
         urlRequest.httpBody = httpBody as Data
 
         // Set timeout if specified
@@ -105,7 +105,8 @@ public struct MultipartData {
             fieldData.append(string: "Content-Type: \(mimeType)\r\n")
         }
         fieldData.append(string: "\r\n")
-        fieldData.append(string: field.data.base64EncodedString())
+        // Append raw bytes followed by CRLF
+        fieldData.append(field.data)
         fieldData.append(string: "\r\n")
 
         return fieldData as Data

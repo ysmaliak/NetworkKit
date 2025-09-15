@@ -1,6 +1,9 @@
 import Foundation
 
-/// A type representing an HTTP network request with a strongly-typed response
+/// A type representing an HTTP network request with a strongly-typed response.
+///
+/// Each `Request` requires a `RequestConfiguration` that specifies base URL,
+/// authentication, cache policy, and timeout behavior.
 public struct Request<Response: Decodable>: Sendable {
     /// The HTTP method for the request (GET, POST, etc.)
     public let method: HTTPMethod
@@ -35,41 +38,35 @@ public struct Request<Response: Decodable>: Sendable {
     /// Authentication provider for the request
     public var authenticationProvider: AuthenticationProvider
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
-    ///   - baseURL: Base URL for the request (defaults to APIClient configuration)
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
-        baseURL: URL? = NetworkManager.configuration.baseURL,
         path: String,
         contentType: ContentType = .json,
         query: [String: String]? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .dictionary(query)
@@ -78,41 +75,35 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
-    ///   - baseURL: Base URL for the request (defaults to APIClient configuration)
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
-        baseURL: URL? = NetworkManager.configuration.baseURL,
         path: String,
         contentType: ContentType = .json,
         query: String? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .string(query)
@@ -121,54 +112,46 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
-    ///   - baseURL: Base URL for the request (defaults to APIClient configuration)
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     public init(
         method: HTTPMethod,
-        baseURL: URL? = NetworkManager.configuration.baseURL,
         path: String,
         contentType: ContentType = .json,
         query: Query? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.query = query
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -177,9 +160,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: [String: String]? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -188,9 +169,9 @@ public struct Request<Response: Decodable>: Sendable {
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .dictionary(query)
@@ -199,17 +180,15 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -218,9 +197,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: String? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -229,9 +206,9 @@ public struct Request<Response: Decodable>: Sendable {
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .string(query)
@@ -240,7 +217,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
@@ -248,9 +225,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - timeoutInterval: Optional timeout duration
-    ///   - cachePolicy: Cache policy for the request
-    ///   - authenticationProvider: Authentication provider for the request
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     public init(
         method: HTTPMethod,
         absoluteURL: URL,
@@ -258,9 +233,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: Query? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        timeoutInterval: TimeInterval? = NetworkManager.configuration.timeoutInterval,
-        cachePolicy: URLRequest.CachePolicy = NetworkManager.configuration.cachePolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -270,15 +243,16 @@ public struct Request<Response: Decodable>: Sendable {
         self.query = query
         self.headers = headers
         self.body = body
-        self.timeoutInterval = timeoutInterval
-        self.cachePolicy = cachePolicy
-        self.authenticationProvider = authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
     }
 
-    /// Converts the request into a URLRequest
+    /// Converts the request into a `URLRequest`.
+    /// - Parameter encoder: The JSON encoder to use when encoding a JSON body.
     /// - Returns: A configured URLRequest ready to be sent
     /// - Throws: RequestError if URL construction fails or authentication fails
-    public func asURLRequest() async throws -> URLRequest {
+    public func asURLRequest(encoder: JSONEncoder) async throws -> URLRequest {
         let url: URL = if let absoluteURL {
             absoluteURL
         } else {
@@ -287,7 +261,7 @@ public struct Request<Response: Decodable>: Sendable {
 
         switch contentType {
         case .json:
-            return try await asURLRequest(url: url)
+            return try await asURLRequest(url: url, encoder: encoder)
         case .multipartData(let fields):
             let multipartData = MultipartData()
 
@@ -306,11 +280,11 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a URLRequest for JSON content type
+    /// Creates a URLRequest for JSON content type.
     /// - Parameter url: The URL for the request
     /// - Returns: A configured URLRequest
     /// - Throws: Errors from authentication or JSON encoding
-    private func asURLRequest(url: URL) async throws -> URLRequest {
+    private func asURLRequest(url: URL, encoder: JSONEncoder) async throws -> URLRequest {
         var urlRequest = URLRequest(url: url)
 
         urlRequest.cachePolicy = cachePolicy
@@ -319,7 +293,7 @@ public struct Request<Response: Decodable>: Sendable {
         try await authenticationProvider.authenticate(&urlRequest)
 
         if let body {
-            urlRequest.httpBody = try NetworkManager.configuration.encoder.encode(body)
+            urlRequest.httpBody = try encoder.encode(body)
 
             if urlRequest.value(forHTTPHeaderField: "Content-Type") == nil {
                 urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -341,7 +315,7 @@ public struct Request<Response: Decodable>: Sendable {
         return urlRequest
     }
 
-    /// Builds a URL from baseURL and path components
+    /// Builds a URL from baseURL and path components.
     /// - Returns: A complete URL
     /// - Throws: RequestError if URL construction fails
     private func buildURL() throws -> URL {
@@ -349,10 +323,11 @@ public struct Request<Response: Decodable>: Sendable {
             throw RequestError.missingBaseURL
         }
 
+        let relativePath = path.hasPrefix("/") ? String(path.dropFirst()) : path
         let url: URL = if #available(iOS 16.0, *) {
-            baseURL.appending(path: path)
+            baseURL.appending(path: relativePath)
         } else {
-            baseURL.appendingPathComponent(path)
+            baseURL.appendingPathComponent(relativePath)
         }
 
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {

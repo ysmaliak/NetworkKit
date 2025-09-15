@@ -41,84 +41,64 @@ dependencies: [
 
 ## Configuration
 
-NetworkKit can be configured globally using the `NetworkManager`. You can configure it in several ways:
+NetworkKit is configured via:
+- `APIClientConfiguration` — client-level settings (retry policy, session, coders, cache)
+- `RequestConfiguration` — per-request settings (base URL, auth, cache policy, timeout)
 
-### Default Configuration
+### APIClient Configuration
 ```swift
-// Use default settings (no base URL, default session config, ISO8601 JSON coding)
-NetworkManager.configure()
+let client = APIClient(configuration: APIClientConfiguration(
+    retryPolicy: .default,                 // default policy; override per call if needed
+    urlSessionConfiguration: .default,     // timeouts, TLS, etc.
+    decoder: .iso8601,                     // JSON decoder
+    encoder: .iso8601,                     // JSON encoder
+    cache: .shared                         // URLCache
+))
 ```
 
-### Custom Configuration
+### Request Configuration
 ```swift
-// Configure with individual settings
-NetworkManager.configure(
+let requestConfig = RequestConfiguration(
     baseURL: URL(string: "https://api.example.com"),
-    retryPolicy: .default,
-    authProvider: .none,
-    urlSessionConfiguration: .default,
-    decoder: .iso8601,
-    encoder: .iso8601,
-    cache: .shared,
-    cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-    timeoutInterval: 30
+    timeoutInterval: 30,
+    cachePolicy: .reloadIgnoringLocalCacheData,
+    authenticationProvider: .none
 )
-
-// Or use a configuration object
-var config = NetworkKit.Configuration(
-    baseURL: URL(string: "https://api.example.com"),
-    retryPolicy: .default,
-    authProvider: .none,
-    urlSessionConfiguration: .default,
-    decoder: .iso8601,
-    encoder: .iso8601,
-    cache: .shared,
-    cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
-    timeoutInterval: 30
-)
-
-NetworkManager.configure(with: config)
 ```
 
-The configuration allows you to customize:
-- Base URL for all requests
-- Retry policy for failed requests
-- Authentication provider for all requests
-- URLSession configuration (timeouts, connection limits, TLS settings)
-- JSON encoding/decoding strategies
-- Response caching behavior and policy
-- Default timeout interval
+Using these together lets you set reliable defaults at the client level while customizing behavior per request.
 
 ## Basic Usage
 
 ### Simple Request
 ```swift
-let apiClient = APIClient()
-
 // Make a GET request
-let userData: UserData = try await apiClient.send(
-    Request<UserData>(method: .get, path: "/user")
-)
+ let userData: UserData = try await apiClient.send(
+    Request<UserData>(method: .get, path: "/user", configuration: requestConfig)
+ )
 
 // POST request with body
 let createUser = Request<UserResponse>(
     method: .post,
     path: "/users",
-    body: UserData(name: "John", email: "john@example.com")
+    body: UserData(name: "John", email: "john@example.com"),
+    configuration: requestConfig
 )
 let response = try await apiClient.send(createUser)
 
 // DELETE request with no response data
 let deleteUser = Request<EmptyResponse>(
-    method: .delete, 
-    path: "/users/123"
+    method: .delete,
+    path: "/users/123",
+    configuration: requestConfig
 )
 _ = try await apiClient.send(deleteUser)
 
 // Request with absolute URL
 let request = Request<UserData>(
     method: .get,
-    absoluteURL: URL(string: "https://api.example.com/users/123")!
+    absoluteURL: URL(string: "https://api.example.com/users/123")!,
+    configuration: RequestConfiguration()
 )
 ```
 
@@ -126,7 +106,7 @@ let request = Request<UserData>(
 NetworkKit supports custom authentication through the `AuthenticationProvider` protocol:
 
 ```swift
-class BearerTokenProvider: AuthenticationProvider {
+final class BearerTokenProvider: AuthenticationProvider {
     private var token: String
     
     func authenticate(_ request: inout URLRequest) async throws {
@@ -138,33 +118,33 @@ class BearerTokenProvider: AuthenticationProvider {
     }
 }
 
-// Use with request
-let request = Request<UserData>(
-    method: .get,
-    path: "/protected/resource",
+// Use with request via RequestConfiguration
+let authConfig = RequestConfiguration(
+    baseURL: URL(string: "https://api.example.com"),
     authenticationProvider: BearerTokenProvider()
 )
+let request = Request<UserData>(method: .get, path: "/protected/resource", configuration: authConfig)
 ```
 
 For endpoints that don't require authentication, you can use the built-in `NoAuthProvider`:
 
 ```swift
 // Using the static property (recommended)
-let request = Request<PublicData>(
-    method: .get,
-    path: "/public/data",
+let publicConfig = RequestConfiguration(
+    baseURL: URL(string: "https://api.example.com"),
     authenticationProvider: .none
 )
+let request = Request<PublicData>(method: .get, path: "/public/data", configuration: publicConfig)
 
 // Using the type directly
-let request = Request<PublicData>(
+let request2 = Request<PublicData>(
     method: .get,
     path: "/public/data",
-    authenticationProvider: NoAuthProvider()
+    configuration: RequestConfiguration(baseURL: URL(string: "https://api.example.com"), authenticationProvider: NoAuthProvider())
 )
 
-// Or omit the authenticationProvider parameter to use NoAuthProvider by default
-let request = Request<PublicData>(method: .get, path: "/public/data")
+// Or rely on the default `.none` provider
+let request3 = Request<PublicData>(method: .get, path: "/public/data", configuration: RequestConfiguration(baseURL: URL(string: "https://api.example.com")))
 ```
 
 The `NoAuthProvider` is the default authentication provider and implements a no-op authentication strategy, meaning it:
@@ -189,11 +169,11 @@ The `DefaultRetryPolicy` provides:
 - Base delay of 0.3 seconds between retries
 
 ```swift
-// Using static property (recommended)
+// Per-call override
 let response = try await apiClient.send(request, retryPolicy: .default)
 
-// Using type directly
-let response = try await apiClient.send(request, retryPolicy: DefaultRetryPolicy())
+// Set a default at the client level
+let client = APIClient(configuration: APIClientConfiguration(retryPolicy: .default))
 ```
 
 ##### No Retry Policy
@@ -262,7 +242,7 @@ Enable response caching for GET requests:
 
 ```swift
 let cachedResponse = try await apiClient.send(
-    Request<CacheableData>(method: .get, path: "/cached-data"),
+    Request<CacheableData>(method: .get, path: "/cached-data", configuration: requestConfig),
     cached: true
 )
 ```
@@ -270,26 +250,33 @@ let cachedResponse = try await apiClient.send(
 ### File Upload
 ```swift
 let imageData = // ... your image data ...
-let response = try await apiClient.upload(
-    for: Request<UploadResponse>(method: .post, path: "/upload"),
-    from: imageData
-)
+let uploadRequest = Request<UploadResponse>(method: .post, path: "/upload", configuration: requestConfig)
+let response = try await apiClient.upload(for: uploadRequest, from: imageData)
 ```
 
 ### Multipart Form Data
 NetworkKit supports multipart form data for file uploads and form submissions:
 
 ```swift
-let imageData = // ... your image data ...
+let imageData = /* your image data */
 let fields: [MultipartDataField] = [
-    .file(name: "avatar", filename: "profile.jpg", data: imageData, contentType: "image/jpeg"),
-    .text(name: "username", value: "john_doe")
+    MultipartDataField(
+        parameters: ["name": "avatar", "filename": "profile.jpg"],
+        data: imageData,
+        mimeType: "image/jpeg"
+    ),
+    MultipartDataField(
+        parameters: ["name": "username"],
+        data: Data("john_doe".utf8),
+        mimeType: nil
+    )
 ]
 
 let request = Request<UploadResponse>(
     method: .post,
     path: "/upload",
-    contentType: .multipartData(fields)
+    contentType: .multipartData(fields),
+    configuration: requestConfig
 )
 let response = try await apiClient.send(request)
 ```

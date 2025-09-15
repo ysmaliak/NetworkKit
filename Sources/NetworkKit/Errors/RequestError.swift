@@ -45,7 +45,7 @@ public enum RequestError: Error, LocalizedError {
     /// Indicates that no base URL was configured.
     ///
     /// This occurs when:
-    /// - The APIConfiguration.baseURL is nil
+    /// - The RequestConfiguration.baseURL is nil
     /// - A relative path is used without a base URL
     /// - The client is not properly configured
     case missingBaseURL
