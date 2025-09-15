@@ -13,27 +13,27 @@ public enum APIError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            String(localized: .apiErrorInvalidResponseDescription, bundle: .module)
+            String(localized: "apiErrorInvalidResponseDescription", bundle: .module)
         case .httpError:
-            String(localized: .apiErrorHttpErrorDescription, bundle: .module)
+            String(localized: "apiErrorHttpErrorDescription", bundle: .module)
         }
     }
 
     public var failureReason: String? {
         switch self {
         case .invalidResponse:
-            String(localized: .apiErrorInvalidResponseReason, bundle: .module)
+            String(localized: "apiErrorInvalidResponseReason", bundle: .module)
         case .httpError:
-            String(localized: .apiErrorHttpErrorReason, bundle: .module)
+            String(localized: "apiErrorHttpErrorReason", bundle: .module)
         }
     }
 
     public var recoverySuggestion: String? {
         switch self {
         case .invalidResponse:
-            String(localized: .apiErrorInvalidResponseSuggestion, bundle: .module)
+            String(localized: "apiErrorInvalidResponseSuggestion", bundle: .module)
         case .httpError:
-            String(localized: .apiErrorHttpErrorSuggestion, bundle: .module)
+            String(localized: "apiErrorHttpErrorSuggestion", bundle: .module)
         }
     }
 }

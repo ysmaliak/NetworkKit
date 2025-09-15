@@ -57,11 +57,11 @@ public enum RequestError: Error, LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .invalidURL:
-            String(localized: .requestErrorInvalidURLDescription, bundle: .module)
+            String(localized: "requestErrorInvalidURLDescription", bundle: .module)
         case .invalidParameters:
-            String(localized: .requestErrorInvalidParametersDescription, bundle: .module)
+            String(localized: "requestErrorInvalidParametersDescription", bundle: .module)
         case .missingBaseURL:
-            String(localized: .requestErrorMissingBaseURLDescription, bundle: .module)
+            String(localized: "requestErrorMissingBaseURLDescription", bundle: .module)
         }
     }
 
@@ -72,11 +72,11 @@ public enum RequestError: Error, LocalizedError {
     public var failureReason: String? {
         switch self {
         case .invalidURL:
-            String(localized: .requestErrorInvalidURLReason, bundle: .module)
+            String(localized: "requestErrorInvalidURLReason", bundle: .module)
         case .invalidParameters:
-            String(localized: .requestErrorInvalidParametersReason, bundle: .module)
+            String(localized: "requestErrorInvalidParametersReason", bundle: .module)
         case .missingBaseURL:
-            String(localized: .requestErrorMissingBaseURLReason, bundle: .module)
+            String(localized: "requestErrorMissingBaseURLReason", bundle: .module)
         }
     }
 
@@ -87,11 +87,11 @@ public enum RequestError: Error, LocalizedError {
     public var recoverySuggestion: String? {
         switch self {
         case .invalidURL:
-            String(localized: .requestErrorInvalidURLSuggestion, bundle: .module)
+            String(localized: "requestErrorInvalidURLSuggestion", bundle: .module)
         case .invalidParameters:
-            String(localized: .requestErrorInvalidParametersSuggestion, bundle: .module)
+            String(localized: "requestErrorInvalidParametersSuggestion", bundle: .module)
         case .missingBaseURL:
-            String(localized: .requestErrorMissingBaseURLSuggestion, bundle: .module)
+            String(localized: "requestErrorMissingBaseURLSuggestion", bundle: .module)
         }
     }
 }
