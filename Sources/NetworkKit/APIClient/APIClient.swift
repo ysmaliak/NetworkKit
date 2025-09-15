@@ -269,6 +269,3 @@ public actor APIClient: APIClientProtocol {
         return try decoder.decode(T.self, from: data)
     }
 }
-
-// Configuration is defined at the top level: see
-// Sources/NetworkKit/APIClientConfiguration.swift for details.

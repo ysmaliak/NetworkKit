@@ -32,5 +32,3 @@ public struct RequestConfiguration: Sendable {
         self.authenticationProvider = authenticationProvider
     }
 }
-
-// No nested alias; prefer top-level `RequestConfiguration` directly.

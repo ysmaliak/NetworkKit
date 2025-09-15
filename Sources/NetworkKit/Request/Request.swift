@@ -58,15 +58,15 @@ public struct Request<Response: Decodable>: Sendable {
         configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = configuration.baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .dictionary(query)
@@ -95,15 +95,15 @@ public struct Request<Response: Decodable>: Sendable {
         configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = configuration.baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .string(query)
@@ -131,16 +131,16 @@ public struct Request<Response: Decodable>: Sendable {
         configuration: RequestConfiguration
     ) {
         self.method = method
-        self.baseURL = configuration.baseURL
+        baseURL = configuration.baseURL
         self.path = path
         absoluteURL = nil
         self.contentType = contentType
         self.query = query
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
     }
 
     /// Creates a new request with an absolute URL.
@@ -169,9 +169,9 @@ public struct Request<Response: Decodable>: Sendable {
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .dictionary(query)
@@ -206,9 +206,9 @@ public struct Request<Response: Decodable>: Sendable {
         self.contentType = contentType
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
 
         if let query {
             self.query = .string(query)
@@ -243,9 +243,9 @@ public struct Request<Response: Decodable>: Sendable {
         self.query = query
         self.headers = headers
         self.body = body
-        self.timeoutInterval = configuration.timeoutInterval
-        self.cachePolicy = configuration.cachePolicy
-        self.authenticationProvider = configuration.authenticationProvider
+        timeoutInterval = configuration.timeoutInterval
+        cachePolicy = configuration.cachePolicy
+        authenticationProvider = configuration.authenticationProvider
     }
 
     /// Converts the request into a `URLRequest`.
