@@ -204,7 +204,8 @@ public actor APIClient: APIClientProtocol {
         retryPolicy: RetryPolicy,
         authenticationProvider: AuthenticationProvider
     ) async throws -> Data {
-        let urlRequest = URLRequest(url: url)
+        var urlRequest = URLRequest(url: url)
+        try await authenticationProvider.authenticate(&urlRequest)
         let (data, response) = try await session.data(for: urlRequest)
 
         guard let response = response as? HTTPURLResponse else {
@@ -228,13 +229,15 @@ public actor APIClient: APIClientProtocol {
     }
 
     private func fetchResponse(for request: URLRequest, useCaching: Bool) async throws -> (Data, URLResponse) {
-        if useCaching, let cachedResponse = cache.cachedResponse(for: request) {
+        let isGet = request.httpMethod?.uppercased() == "GET"
+
+        if useCaching, isGet, let cachedResponse = cache.cachedResponse(for: request) {
             return (cachedResponse.data, cachedResponse.response)
         }
 
         let (data, response) = try await session.data(for: request)
 
-        if useCaching {
+        if useCaching, isGet {
             cache.storeCachedResponse(CachedURLResponse(response: response, data: data), for: request)
         }
 

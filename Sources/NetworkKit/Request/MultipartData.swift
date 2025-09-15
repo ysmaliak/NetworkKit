@@ -74,8 +74,8 @@ public struct MultipartData {
         urlRequest.httpMethod = method.rawValue
         urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
-        // Finalize body data
-        httpBody.append(string: "--\(boundary)--")
+        // Finalize body data with closing boundary
+        httpBody.append(string: "--\(boundary)--\r\n")
         urlRequest.httpBody = httpBody as Data
 
         // Set timeout if specified
@@ -105,7 +105,8 @@ public struct MultipartData {
             fieldData.append(string: "Content-Type: \(mimeType)\r\n")
         }
         fieldData.append(string: "\r\n")
-        fieldData.append(string: field.data.base64EncodedString())
+        // Append raw bytes followed by CRLF
+        fieldData.append(field.data)
         fieldData.append(string: "\r\n")
 
         return fieldData as Data

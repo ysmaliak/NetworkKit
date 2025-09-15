@@ -323,10 +323,11 @@ public struct Request<Response: Decodable>: Sendable {
             throw RequestError.missingBaseURL
         }
 
+        let relativePath = path.hasPrefix("/") ? String(path.dropFirst()) : path
         let url: URL = if #available(iOS 16.0, *) {
-            baseURL.appending(path: path)
+            baseURL.appending(path: relativePath)
         } else {
-            baseURL.appendingPathComponent(path)
+            baseURL.appendingPathComponent(relativePath)
         }
 
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
