@@ -22,7 +22,9 @@ public struct APIClientConfiguration: Sendable {
     /// - Parameters:
     ///   - retryPolicy: Default retry behavior for requests. Use `.default` for
     ///     exponential backoff with auth handling or `.none` to disable retries.
+    ///     Defaults to `.default`.
     ///   - urlSessionConfiguration: Session configuration (timeouts, TLS, caching).
+    ///     Defaults to `.default`.
     ///   - decoder: JSON decoder for response decoding. Defaults to `.iso8601`.
     ///   - encoder: JSON encoder for request bodies. Defaults to `.iso8601`.
     ///   - cache: Cache used for response caching. Defaults to `.shared`.
@@ -40,5 +42,3 @@ public struct APIClientConfiguration: Sendable {
         self.cache = cache
     }
 }
-
-// No nested alias; prefer top-level `APIClientConfiguration` directly.

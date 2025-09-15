@@ -42,10 +42,10 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
     ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
@@ -79,10 +79,10 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
     ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
@@ -116,10 +116,10 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
     ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     public init(
         method: HTTPMethod,
@@ -147,10 +147,10 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
     ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(
@@ -184,10 +184,10 @@ public struct Request<Response: Decodable>: Sendable {
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
-    ///   - contentType: Type of content being sent
-    ///   - query: Optional query parameters
-    ///   - headers: Optional HTTP headers
-    ///   - body: Optional request body
+    ///   - contentType: Type of content being sent. Defaults to `.json`.
+    ///   - query: Optional query parameters. Defaults to `nil`.
+    ///   - headers: Optional HTTP headers. Defaults to an empty dictionary.
+    ///   - body: Optional request body. Defaults to `nil`.
     ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(

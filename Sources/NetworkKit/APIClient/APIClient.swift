@@ -82,7 +82,7 @@ public actor APIClient: APIClientProtocol {
     ///
     /// - Parameters:
     ///   - request: The typed request to send.
-    ///   - cached: Whether to use cached responses if available.
+    ///   - cached: Whether to use cached responses if available. Defaults to `false`.
     /// - Returns: The decoded response of type `T`.
     /// - Throws: `APIError` or any error from the network request or decoding.
     @discardableResult
@@ -95,7 +95,7 @@ public actor APIClient: APIClientProtocol {
     /// - Parameters:
     ///   - request: The typed request to send
     ///   - retryPolicy: Policy determining retry behavior for failed requests
-    ///   - cached: Whether to use cached responses if available
+    ///   - cached: Whether to use cached responses if available. Defaults to `false`.
     /// - Returns: The decoded response of type T
     /// - Throws: APIError or any error from the network request or decoding
     @discardableResult

@@ -15,7 +15,7 @@ public struct MultipartDataField: Sendable {
     /// - Parameters:
     ///   - parameters: Key-value pairs of parameters for the field
     ///   - data: The content data
-    ///   - mimeType: Optional MIME type of the content
+    ///   - mimeType: Optional MIME type of the content. Defaults to `nil`.
     public init(parameters: [String: String], data: Data, mimeType: String? = nil) {
         self.parameters = parameters
         self.data = data
