@@ -31,9 +31,10 @@ public protocol APIClientProtocol: Sendable {
 /// )
 /// ```
 public actor APIClient: APIClientProtocol {
+    /// The retry policy for the APIClient
+    private let retryPolicy: RetryPolicy
+
     /// The URLSession used for network requests
-    ///
-    /// Created lazily with the current configuration settings
     private let session: URLSession
 
     /// JSON decoder used for parsing responses
@@ -47,10 +48,16 @@ public actor APIClient: APIClientProtocol {
 
     /// Creates a new APIClient with the specified configuration.
     public init(configuration: Configuration) {
-        self.session = URLSession(configuration: configuration.urlSessionConfiguration)
-        self.decoder = configuration.decoder
-        self.encoder = configuration.encoder
-        self.cache = configuration.cache
+        retryPolicy = configuration.retryPolicy
+        session = URLSession(configuration: configuration.urlSessionConfiguration)
+        decoder = configuration.decoder
+        encoder = configuration.encoder
+        cache = configuration.cache
+    }
+
+    @discardableResult
+    public func send<T: Decodable & Sendable>(_ request: Request<T>, cached: Bool = false) async throws -> T {
+        try await send(request, retryPolicy: retryPolicy, cached: cached)
     }
 
     /// Sends a network request and decodes the response.
@@ -64,7 +71,7 @@ public actor APIClient: APIClientProtocol {
     @discardableResult
     public func send<T: Decodable & Sendable>(
         _ request: Request<T>,
-        retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy,
+        retryPolicy: RetryPolicy,
         cached: Bool = false
     ) async throws -> T {
         let urlRequest = try await request.asURLRequest(encoder: encoder)
@@ -76,6 +83,11 @@ public actor APIClient: APIClientProtocol {
         }
 
         return try await handleResponse(response, data: data, for: request, cached: cached, retryPolicy: retryPolicy)
+    }
+
+    @discardableResult
+    public func upload<T: Decodable & Sendable>(for request: Request<T>, from data: Data) async throws -> T {
+        try await upload(for: request, from: data, retryPolicy: retryPolicy)
     }
 
     /// Uploads data with a network request and decodes the response.
@@ -90,7 +102,7 @@ public actor APIClient: APIClientProtocol {
     public func upload<T: Decodable & Sendable>(
         for request: Request<T>,
         from data: Data,
-        retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy
+        retryPolicy: RetryPolicy
     ) async throws -> T {
         let urlRequest = try await request.asURLRequest(encoder: encoder)
         let (responseData, response) = try await session.upload(for: urlRequest, from: data)
@@ -102,6 +114,10 @@ public actor APIClient: APIClientProtocol {
         return try await handleResponse(response, data: responseData, for: request, cached: false, retryPolicy: retryPolicy)
     }
 
+    public func data(for request: Request<Data>) async throws -> Data {
+        try await data(for: request, retryPolicy: retryPolicy)
+    }
+
     /// Downloads data from a URL with retry support.
     ///
     /// - Parameters:
@@ -109,7 +125,7 @@ public actor APIClient: APIClientProtocol {
     ///   - retryPolicy: Policy determining retry behavior for failed requests
     /// - Returns: The downloaded data
     /// - Throws: APIError or any network request error
-    public func data(for request: Request<Data>, retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy) async throws -> Data {
+    public func data(for request: Request<Data>, retryPolicy: RetryPolicy) async throws -> Data {
         let urlRequest = try await request.asURLRequest(encoder: encoder)
         let (data, response) = try await session.data(for: urlRequest)
 
@@ -118,6 +134,10 @@ public actor APIClient: APIClientProtocol {
         }
 
         return try await handleResponse(response, data: data, for: request, cached: false, retryPolicy: retryPolicy)
+    }
+
+    public func data(for url: URL, authenticationProvider: AuthenticationProvider) async throws -> Data {
+        try await data(for: url, retryPolicy: retryPolicy, authenticationProvider: authenticationProvider)
     }
 
     /// Downloads data from a raw URL with retry support.
@@ -129,8 +149,8 @@ public actor APIClient: APIClientProtocol {
     /// - Throws: APIError or any network request error
     public func data(
         for url: URL,
-        retryPolicy: RetryPolicy = NetworkManager.configuration.retryPolicy,
-        authenticationProvider: AuthenticationProvider = NetworkManager.configuration.authProvider
+        retryPolicy: RetryPolicy,
+        authenticationProvider: AuthenticationProvider
     ) async throws -> Data {
         let urlRequest = URLRequest(url: url)
         let (data, response) = try await session.data(for: urlRequest)
@@ -149,7 +169,7 @@ public actor APIClient: APIClientProtocol {
                 throw APIError.httpError(response: response, data: data)
             }
 
-            return try await self.data(for: url, retryPolicy: retryPolicy)
+            return try await self.data(for: url, retryPolicy: retryPolicy, authenticationProvider: authenticationProvider)
         }
 
         return data
