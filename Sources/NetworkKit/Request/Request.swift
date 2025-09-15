@@ -1,6 +1,9 @@
 import Foundation
 
-/// A type representing an HTTP network request with a strongly-typed response
+/// A type representing an HTTP network request with a strongly-typed response.
+///
+/// Each `Request` requires a `RequestConfiguration` that specifies base URL,
+/// authentication, cache policy, and timeout behavior.
 public struct Request<Response: Decodable>: Sendable {
     /// The HTTP method for the request (GET, POST, etc.)
     public let method: HTTPMethod
@@ -35,7 +38,7 @@ public struct Request<Response: Decodable>: Sendable {
     /// Authentication provider for the request
     public var authenticationProvider: AuthenticationProvider
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
@@ -43,7 +46,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -52,7 +55,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: [String: String]? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         self.baseURL = configuration.baseURL
@@ -72,7 +75,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
@@ -80,7 +83,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -89,7 +92,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: String? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         self.baseURL = configuration.baseURL
@@ -109,7 +112,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with a base URL and path
+    /// Creates a new request with a base URL and path.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - path: Path component to append to base URL
@@ -117,7 +120,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (base URL, auth, cache, timeout)
     public init(
         method: HTTPMethod,
         path: String,
@@ -125,7 +128,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: Query? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         self.baseURL = configuration.baseURL
@@ -140,7 +143,7 @@ public struct Request<Response: Decodable>: Sendable {
         self.authenticationProvider = configuration.authenticationProvider
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
@@ -148,7 +151,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -157,7 +160,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: [String: String]? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -177,7 +180,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
@@ -185,7 +188,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     @_disfavoredOverload
     public init(
         method: HTTPMethod,
@@ -194,7 +197,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: String? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -214,7 +217,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a new request with an absolute URL
+    /// Creates a new request with an absolute URL.
     /// - Parameters:
     ///   - method: The HTTP method
     ///   - absoluteURL: Complete URL for the request
@@ -222,7 +225,7 @@ public struct Request<Response: Decodable>: Sendable {
     ///   - query: Optional query parameters
     ///   - headers: Optional HTTP headers
     ///   - body: Optional request body
-    ///   - configuration: Configuration for the request
+    ///   - configuration: Configuration for the request (auth, cache, timeout)
     public init(
         method: HTTPMethod,
         absoluteURL: URL,
@@ -230,7 +233,7 @@ public struct Request<Response: Decodable>: Sendable {
         query: Query? = nil,
         headers: [String: String] = [:],
         body: Body? = nil,
-        configuration: Configuration
+        configuration: RequestConfiguration
     ) {
         self.method = method
         baseURL = nil
@@ -245,8 +248,8 @@ public struct Request<Response: Decodable>: Sendable {
         self.authenticationProvider = configuration.authenticationProvider
     }
 
-    /// Converts the request into a URLRequest
-    /// - Parameter encoder: The JSON encoder to use for the request
+    /// Converts the request into a `URLRequest`.
+    /// - Parameter encoder: The JSON encoder to use when encoding a JSON body.
     /// - Returns: A configured URLRequest ready to be sent
     /// - Throws: RequestError if URL construction fails or authentication fails
     public func asURLRequest(encoder: JSONEncoder) async throws -> URLRequest {
@@ -277,7 +280,7 @@ public struct Request<Response: Decodable>: Sendable {
         }
     }
 
-    /// Creates a URLRequest for JSON content type
+    /// Creates a URLRequest for JSON content type.
     /// - Parameter url: The URL for the request
     /// - Returns: A configured URLRequest
     /// - Throws: Errors from authentication or JSON encoding
@@ -312,7 +315,7 @@ public struct Request<Response: Decodable>: Sendable {
         return urlRequest
     }
 
-    /// Builds a URL from baseURL and path components
+    /// Builds a URL from baseURL and path components.
     /// - Returns: A complete URL
     /// - Throws: RequestError if URL construction fails
     private func buildURL() throws -> URL {
@@ -368,26 +371,5 @@ extension Request {
 
         /// Query parameters as a single string
         case string(String)
-    }
-}
-
-extension Request {
-    public struct Configuration: Sendable {
-        public let baseURL: URL?
-        public let timeoutInterval: TimeInterval?
-        public let cachePolicy: URLRequest.CachePolicy
-        public let authenticationProvider: AuthenticationProvider
-
-        public init(
-            baseURL: URL? = nil,
-            timeoutInterval: TimeInterval? = 30,
-            cachePolicy: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData,
-            authenticationProvider: AuthenticationProvider = .none
-        ) {
-            self.baseURL = baseURL
-            self.timeoutInterval = timeoutInterval
-            self.cachePolicy = cachePolicy
-            self.authenticationProvider = authenticationProvider
-        }
     }
 }

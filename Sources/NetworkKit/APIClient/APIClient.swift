@@ -25,9 +25,26 @@ public protocol APIClientProtocol: Sendable {
 ///
 /// Example usage:
 /// ```swift
-/// let client = APIClient()
+/// // Configure the client (retry policy, session, coders, cache)
+/// let client = APIClient(configuration: APIClientConfiguration(
+///     retryPolicy: .default,
+///     urlSessionConfiguration: .default,
+///     decoder: .iso8601,
+///     encoder: .iso8601,
+///     cache: .shared
+/// ))
+///
+/// // Configure the request (base URL, auth, cache policy, timeout)
+/// let requestConfig = RequestConfiguration(
+///     baseURL: URL(string: "https://api.example.com"),
+///     timeoutInterval: 30,
+///     cachePolicy: .reloadIgnoringLocalCacheData,
+///     authenticationProvider: .none
+/// )
+///
+/// // Build and send a request
 /// let response: UserData = try await client.send(
-///     Request<UserData>(method: .get, path: "/user")
+///     Request<UserData>(method: .get, path: "/user", configuration: requestConfig)
 /// )
 /// ```
 public actor APIClient: APIClientProtocol {
@@ -47,7 +64,10 @@ public actor APIClient: APIClientProtocol {
     private let cache: URLCache
 
     /// Creates a new APIClient with the specified configuration.
-    public init(configuration: Configuration) {
+    ///
+    /// - Parameter configuration: Settings controlling retry policy, URLSession,
+    ///   JSON encoding/decoding, and caching behavior for requests issued by this client.
+    public init(configuration: APIClientConfiguration) {
         retryPolicy = configuration.retryPolicy
         session = URLSession(configuration: configuration.urlSessionConfiguration)
         decoder = configuration.decoder
@@ -55,6 +75,16 @@ public actor APIClient: APIClientProtocol {
         cache = configuration.cache
     }
 
+    /// Sends a network request and decodes the response using the client's default retry policy.
+    ///
+    /// To override the retry behavior for a single request, use the overload that takes a
+    /// `retryPolicy` parameter.
+    ///
+    /// - Parameters:
+    ///   - request: The typed request to send.
+    ///   - cached: Whether to use cached responses if available.
+    /// - Returns: The decoded response of type `T`.
+    /// - Throws: `APIError` or any error from the network request or decoding.
     @discardableResult
     public func send<T: Decodable & Sendable>(_ request: Request<T>, cached: Bool = false) async throws -> T {
         try await send(request, retryPolicy: retryPolicy, cached: cached)
@@ -85,6 +115,16 @@ public actor APIClient: APIClientProtocol {
         return try await handleResponse(response, data: data, for: request, cached: cached, retryPolicy: retryPolicy)
     }
 
+    /// Uploads data for a request using the client's default retry policy.
+    ///
+    /// To override retry behavior for this upload only, use the overload that takes a
+    /// `retryPolicy` parameter.
+    ///
+    /// - Parameters:
+    ///   - request: The typed request to send.
+    ///   - data: The data to upload as the HTTP body.
+    /// - Returns: The decoded response of type `T`.
+    /// - Throws: `APIError` or any error from the network request or decoding.
     @discardableResult
     public func upload<T: Decodable & Sendable>(for request: Request<T>, from data: Data) async throws -> T {
         try await upload(for: request, from: data, retryPolicy: retryPolicy)
@@ -114,6 +154,11 @@ public actor APIClient: APIClientProtocol {
         return try await handleResponse(response, data: responseData, for: request, cached: false, retryPolicy: retryPolicy)
     }
 
+    /// Downloads raw data for a typed request using the client's default retry policy.
+    ///
+    /// - Parameter request: The request describing the resource to fetch.
+    /// - Returns: The downloaded data.
+    /// - Throws: `APIError` or any network request error.
     public func data(for request: Request<Data>) async throws -> Data {
         try await data(for: request, retryPolicy: retryPolicy)
     }
@@ -136,6 +181,13 @@ public actor APIClient: APIClientProtocol {
         return try await handleResponse(response, data: data, for: request, cached: false, retryPolicy: retryPolicy)
     }
 
+    /// Downloads raw data from a URL using the client's default retry policy.
+    ///
+    /// - Parameters:
+    ///   - url: The absolute URL to download from.
+    ///   - authenticationProvider: Provider used to authenticate the request.
+    /// - Returns: The downloaded data.
+    /// - Throws: `APIError` or any network request error.
     public func data(for url: URL, authenticationProvider: AuthenticationProvider) async throws -> Data {
         try await data(for: url, retryPolicy: retryPolicy, authenticationProvider: authenticationProvider)
     }
@@ -206,7 +258,8 @@ public actor APIClient: APIClientProtocol {
                 throw APIError.httpError(response: response, data: data)
             }
 
-            return try await send(request, cached: cached)
+            // Preserve the per-call retry policy on recursive retry attempts
+            return try await send(request, retryPolicy: retryPolicy, cached: cached)
         }
 
         guard T.self != EmptyResponse.self else {
@@ -217,26 +270,5 @@ public actor APIClient: APIClientProtocol {
     }
 }
 
-extension APIClient {
-    public struct Configuration: Sendable {
-        public let retryPolicy: RetryPolicy
-        public let urlSessionConfiguration: URLSessionConfiguration
-        public let decoder: JSONDecoder
-        public let encoder: JSONEncoder
-        public let cache: URLCache
-
-        public init(
-            retryPolicy: RetryPolicy = .default,
-            urlSessionConfiguration: URLSessionConfiguration = .default,
-            decoder: JSONDecoder = .iso8601,
-            encoder: JSONEncoder = .iso8601,
-            cache: URLCache = .shared
-        ) {
-            self.retryPolicy = retryPolicy
-            self.urlSessionConfiguration = urlSessionConfiguration
-            self.decoder = decoder
-            self.encoder = encoder
-            self.cache = cache
-        }
-    }
-}
+// Configuration is defined at the top level: see
+// Sources/NetworkKit/APIClientConfiguration.swift for details.
